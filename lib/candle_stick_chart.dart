@@ -68,66 +68,6 @@ class _CandlestickChartPainter extends CustomPainter {
       ..color = Colors.black
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
-    final TextPainter textPainter = TextPainter(
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    );
-
-    // Draw vertical axis lines and labels
-    final double axisX = width + candleWidth / 2;
-    canvas.drawLine(
-        Offset(axisX, 0), Offset(axisX, height - chartPadding), linePaint);
-    for (int i = 0; i < 5; i++) {
-      final double price = minPrice + (i / 4) * priceRange;
-      final double labelY =
-          height - (price - minPrice) * pricePerPixel - chartPadding;
-      final TextSpan span = TextSpan(
-        text: price.toStringAsFixed(2),
-        style: const TextStyle(fontSize: 10, color: Colors.black),
-      );
-
-      textPainter
-        ..text = span
-        ..layout()
-        ..paint(canvas, Offset(axisX + 5, labelY - textPainter.height / 2));
-
-      canvas.drawLine(
-          Offset(axisX - 3, labelY), Offset(axisX + 3, labelY), linePaint);
-    }
-
-    // Draw horizontal axis line
-    canvas.drawLine(
-      Offset(0, height - chartPadding),
-      Offset(width + candleWidth / 2, height - chartPadding),
-      linePaint,
-    );
-
-    // Draw X-axis labels
-    final double labelY = height - chartPadding + 5;
-    for (int i = 0; i < data.length; i++) {
-      final double candleX = i * candleWidth + candleWidth / 2;
-
-      final TextSpan span = TextSpan(
-        text: data[i].label,
-        style: const TextStyle(fontSize: 10, color: Colors.black),
-      );
-
-      textPainter
-        ..text = span
-        ..layout();
-
-      canvas
-        ..save()
-        ..translate(candleX, labelY)
-        ..rotate(90 * 3.14159 / 180);
-
-      textPainter.paint(
-        canvas,
-        Offset(-textPainter.height / 2 + 8, -textPainter.height / 2),
-      );
-
-      canvas.restore();
-    }
 
     for (int i = 0; i < data.length; i++) {
       final double candleX = i * candleWidth + candleWidth / 2;

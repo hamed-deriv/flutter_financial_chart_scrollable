@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_financial_chart/candle_stick_chart.dart';
 import 'package:flutter_financial_chart/candle_stick_model.dart';
 import 'package:flutter_financial_chart/helpers.dart';
+import 'package:flutter_financial_chart/horizontal_axis_painter.dart';
+import 'package:flutter_financial_chart/vertical_axis_painter.dart';
 
 void main() {
   runApp(MyApp());
@@ -47,28 +49,40 @@ class _CandlestickChartExampleState extends State<CandlestickChartExample> {
         body: Center(
           child: Container(
             padding: const EdgeInsets.only(left: 8, right: 48),
-            child: GestureDetector(
-              child:
-                  CandleStickChart(data: allData.sublist(startIndex, endIndex)),
-              onHorizontalDragUpdate: (DragUpdateDetails details) {
-                if (details.delta.dx > 0) {
-                  if (startIndex == 0) {
-                    return;
-                  }
+            child: Stack(
+              children: <Widget>[
+                HorizontalAxisPainter(
+                  data: allData.sublist(startIndex, endIndex),
+                ),
+                VerticalAxisPainter(
+                  data: allData.sublist(startIndex, endIndex),
+                ),
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: CandleStickChart(
+                    data: allData.sublist(startIndex, endIndex),
+                  ),
+                  onHorizontalDragUpdate: (DragUpdateDetails details) {
+                    if (details.delta.dx > 0) {
+                      if (startIndex == 0) {
+                        return;
+                      }
 
-                  startIndex = startIndex - 1;
-                  endIndex = endIndex - 1;
-                } else {
-                  if (endIndex == allData.length) {
-                    return;
-                  }
+                      startIndex = startIndex - 1;
+                      endIndex = endIndex - 1;
+                    } else {
+                      if (endIndex == allData.length) {
+                        return;
+                      }
 
-                  startIndex = startIndex + 1;
-                  endIndex = endIndex + 1;
-                }
+                      startIndex = startIndex + 1;
+                      endIndex = endIndex + 1;
+                    }
 
-                setState(() {});
-              },
+                    setState(() {});
+                  },
+                ),
+              ],
             ),
           ),
         ),
