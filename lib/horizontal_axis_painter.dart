@@ -45,7 +45,7 @@ class _CandlestickChartPainter extends CustomPainter {
 
     // Draw X-axis labels
     final double labelY = height - chartPadding + 5;
-    for (int i = 0; i < data.length; i++) {
+    for (int i = 0; i < data.length; i += 4) {
       final double candleX = i * candleWidth + candleWidth / 2;
 
       final TextSpan span = TextSpan(

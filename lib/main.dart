@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_financial_chart/candle_stick_chart.dart';
 import 'package:flutter_financial_chart/candle_stick_model.dart';
+import 'package:flutter_financial_chart/grid_painter.dart';
 import 'package:flutter_financial_chart/helpers.dart';
 import 'package:flutter_financial_chart/horizontal_axis_painter.dart';
 import 'package:flutter_financial_chart/vertical_axis_painter.dart';
@@ -55,6 +56,9 @@ class _CandlestickChartExampleState extends State<CandlestickChartExample> {
                   data: allData.sublist(startIndex, endIndex),
                 ),
                 VerticalAxisPainter(
+                  data: allData.sublist(startIndex, endIndex),
+                ),
+                GridPainter(
                   data: allData.sublist(startIndex, endIndex),
                 ),
                 GestureDetector(
