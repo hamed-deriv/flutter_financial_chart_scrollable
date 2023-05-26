@@ -78,18 +78,31 @@ class _CandlestickChartPainter extends CustomPainter {
     );
 
     // Draw X-axis labels
+// Draw X-axis labels
     final double labelY = height - chartPadding + 5;
     for (int i = 0; i < data.length; i++) {
       final double candleX = i * candleWidth + candleWidth / 2;
+
       final TextSpan span = TextSpan(
-        text: (i + 1).toString(),
+        text: data[i].label,
         style: const TextStyle(fontSize: 10, color: Colors.black),
       );
 
       textPainter
         ..text = span
-        ..layout()
-        ..paint(canvas, Offset(candleX - textPainter.width / 2, labelY));
+        ..layout();
+
+      canvas
+        ..save()
+        ..translate(candleX, labelY)
+        ..rotate(90 * 3.14159 / 180);
+
+      textPainter.paint(
+        canvas,
+        Offset(-textPainter.height / 2 + 8, -textPainter.height / 2),
+      );
+
+      canvas.restore();
     }
 
     for (int i = 0; i < data.length; i++) {
