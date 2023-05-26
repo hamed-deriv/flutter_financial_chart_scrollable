@@ -5,6 +5,7 @@ import 'package:flutter_financial_chart/candle_stick_model.dart';
 import 'package:flutter_financial_chart/grid_painter.dart';
 import 'package:flutter_financial_chart/helpers.dart';
 import 'package:flutter_financial_chart/horizontal_axis_painter.dart';
+import 'package:flutter_financial_chart/line_chart.dart';
 import 'package:flutter_financial_chart/vertical_axis_painter.dart';
 
 void main() {
@@ -64,8 +65,15 @@ class _CandlestickChartExampleState extends State<CandlestickChartExample> {
                 ),
                 GestureDetector(
                   behavior: HitTestBehavior.translucent,
-                  child: CandleStickChart(
-                    data: allData.sublist(startIndex, endIndex),
+                  child: Stack(
+                    children: [
+                      CandleStickChart(
+                        data: allData.sublist(startIndex, endIndex),
+                      ),
+                      LineChart(
+                        data: allData.sublist(startIndex, endIndex),
+                      ),
+                    ],
                   ),
                   onHorizontalDragUpdate: (DragUpdateDetails details) {
                     final double dx = details.delta.dx;
