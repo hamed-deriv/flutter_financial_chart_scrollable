@@ -33,6 +33,7 @@ class _CandlestickChartExampleState extends State<CandlestickChartExample> {
 
   int startIndex = 0;
   int endIndex = 100;
+  double dragVelocity = 0;
 
   @override
   void initState() {
@@ -67,23 +68,47 @@ class _CandlestickChartExampleState extends State<CandlestickChartExample> {
                     data: allData.sublist(startIndex, endIndex),
                   ),
                   onHorizontalDragUpdate: (DragUpdateDetails details) {
-                    if (details.delta.dx > 0) {
-                      if (startIndex == 0) {
-                        return;
-                      }
+                    final double dx = details.delta.dx;
+                    final double dragDistance = dx.abs();
 
-                      startIndex = startIndex - 1;
-                      endIndex = endIndex - 1;
+                    if (dragDistance > 5) {
+                      final int direction = dx > 0 ? -1 : 1;
+                      final int dragIndex = (dragDistance ~/ 3) * direction;
+
+                      final int newStartIndex = startIndex + dragIndex;
+                      final int newEndIndex = endIndex + dragIndex;
+
+                      if (newStartIndex >= 0 && newEndIndex <= allData.length) {
+                        startIndex = newStartIndex;
+                        endIndex = newEndIndex;
+
+                        setState(() {});
+                      }
                     } else {
-                      if (endIndex == allData.length) {
-                        return;
+                      if (details.delta.dx > 0) {
+                        if (startIndex == 0) {
+                          return;
+                        }
+
+                        startIndex = startIndex - 1;
+                        endIndex = endIndex - 1;
+                      } else {
+                        if (endIndex == allData.length) {
+                          return;
+                        }
+
+                        startIndex = startIndex + 1;
+                        endIndex = endIndex + 1;
                       }
 
-                      startIndex = startIndex + 1;
-                      endIndex = endIndex + 1;
+                      setState(() {});
                     }
-
-                    setState(() {});
+                  },
+                  onHorizontalDragEnd: (DragEndDetails details) {
+                    dragVelocity = details.primaryVelocity ?? 0.0;
+                    if (dragVelocity.abs() > 500) {
+                      smoothScroll();
+                    }
                   },
                 ),
               ],
@@ -91,4 +116,42 @@ class _CandlestickChartExampleState extends State<CandlestickChartExample> {
           ),
         ),
       );
+
+  void smoothScroll() {
+    if (dragVelocity > 0) {
+      // Scrolling to the right
+      endIndex -= 1;
+      startIndex -= 1;
+    } else {
+      // Scrolling to the left
+      endIndex += 1;
+      startIndex += 1;
+    }
+
+    if (startIndex >= 0 && endIndex <= allData.length) {
+      setState(() {});
+
+      dragVelocity *= 0.9; // Applying damping factor for smoothness
+
+      if (dragVelocity.abs() > 10) {
+        // Continue scrolling
+        Future<void>.delayed(const Duration(milliseconds: 16), smoothScroll);
+      } else {
+        // Snap to nearest index
+        snapToNearestIndex();
+      }
+    } else {
+      // Snap to nearest index
+      snapToNearestIndex();
+    }
+  }
+
+  void snapToNearestIndex() {
+    // Snap to the nearest index
+    final int nearestIndex = (dragVelocity > 0) ? endIndex + 1 : endIndex - 1;
+    startIndex = nearestIndex - 20;
+    endIndex = nearestIndex;
+
+    setState(() {});
+  }
 }
