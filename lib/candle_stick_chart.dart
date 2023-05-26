@@ -1,23 +1,48 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_financial_chart/candle_stick_model.dart';
 
-class CandleStickChart extends StatelessWidget {
+class CandleStickChart extends StatefulWidget {
   const CandleStickChart({required this.data});
 
   final List<CandleStickModel> data;
 
   @override
-  Widget build(BuildContext context) => CustomPaint(
-        size: const Size(double.infinity, 200),
-        painter: _CandlestickChartPainter(data: data),
+  _CandleStickChartState createState() => _CandleStickChartState();
+}
+
+class _CandleStickChartState extends State<CandleStickChart> {
+  Offset? tapPosition;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTapDown: (TapDownDetails details) {
+          setState(() {
+            tapPosition = details.localPosition;
+          });
+        },
+        onTapUp: (_) {
+          setState(() {
+            tapPosition = null;
+          });
+        },
+        child: CustomPaint(
+          size: const Size(double.infinity, 200),
+          painter: _CandlestickChartPainter(
+            data: widget.data,
+            tapPosition: tapPosition,
+          ),
+        ),
       );
 }
 
 class _CandlestickChartPainter extends CustomPainter {
-  _CandlestickChartPainter({required this.data});
+  _CandlestickChartPainter({required this.data, this.tapPosition});
 
   final List<CandleStickModel> data;
+  final Offset? tapPosition;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -78,7 +103,6 @@ class _CandlestickChartPainter extends CustomPainter {
     );
 
     // Draw X-axis labels
-// Draw X-axis labels
     final double labelY = height - chartPadding + 5;
     for (int i = 0; i < data.length; i++) {
       final double candleX = i * candleWidth + candleWidth / 2;
@@ -138,9 +162,45 @@ class _CandlestickChartPainter extends CustomPainter {
           ? positiveCandlePaint
           : negativeCandlePaint;
       canvas.drawRect(candleRect, candlePaint);
+
+      if (tapPosition != null && candleRect.contains(tapPosition!)) {
+        const double tooltipWidth = 80;
+        const double tooltipHeight = 30;
+
+        final double tooltipX = candleX - tooltipWidth / 2;
+        final double tooltipY = candleTop - tooltipHeight - 5;
+        final Rect tooltipRect =
+            Rect.fromLTWH(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
+
+        final Paint tooltipPaint = Paint()
+          ..color = Colors.black.withOpacity(0.8);
+        canvas.drawRect(tooltipRect, tooltipPaint);
+
+        final ui.ParagraphBuilder tooltipBuilder = ui.ParagraphBuilder(
+          ui.ParagraphStyle(
+            textAlign: TextAlign.center,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        )
+          ..pushStyle(ui.TextStyle(color: Colors.white))
+          ..addText(
+            'Open: ${candle.open.toStringAsFixed(2)}\nClose: ${candle.close.toStringAsFixed(2)}',
+          );
+
+        final ui.Paragraph tooltipParagraph = tooltipBuilder.build()
+          ..layout(const ui.ParagraphConstraints(width: tooltipWidth));
+
+        canvas.drawParagraph(
+          tooltipParagraph,
+          Offset(tooltipX + (tooltipWidth - tooltipParagraph.width) / 2,
+              tooltipY + (tooltipHeight - tooltipParagraph.height) / 2),
+        );
+      }
     }
   }
 
   @override
-  bool shouldRepaint(_CandlestickChartPainter oldDelegate) => true;
+  bool shouldRepaint(_CandlestickChartPainter oldDelegate) =>
+      oldDelegate.data != data || oldDelegate.tapPosition != tapPosition;
 }
