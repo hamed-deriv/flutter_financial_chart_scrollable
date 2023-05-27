@@ -66,7 +66,7 @@ class _CandlestickChartExampleState extends State<CandlestickChartExample> {
                 GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   child: Stack(
-                    children: [
+                    children: <Widget>[
                       CandleStickChart(
                         data: allData.sublist(startIndex, endIndex),
                       ),
